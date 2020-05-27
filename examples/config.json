@@ -1,0 +1,24 @@
+{
+  "Auth": {
+    "Username": "",
+    "Password": "",
+    "Header": "",
+    "Token": ""
+  },
+  "URI": {
+    "Base": ""
+  },
+  "Options": {
+    "CAPath": "",
+    "VerifySSL": true,
+    "Debug": false,
+    "SEM": 15,
+    "Content_Type": "application/json; charset=utf-8"
+  },
+  "Proxy": {
+    "URI": "",
+    "Port": "",
+    "Username": "",
+    "Password": ""
+  }
+}

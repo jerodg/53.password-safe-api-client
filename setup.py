@@ -63,11 +63,11 @@ def main() -> NoReturn:
                         'Say Thanks!':   'https://saythanks.io/to/jerodg',
                         'Source':        'https://github.com/jerodg/password-safe-api-client'},
           python_requires='>=3.8, <3.9',
-          setup_requires=['base-api-client', 'delorean'] + ['pytest-runner'] if {'pytest', 'test', 'ptr'}
+          setup_requires=['base-api-client'] + ['pytest-runner'] if {'pytest', 'test', 'ptr'}
           .intersection(sys.argv) else [],
           tests_require=['pytest', 'pytest-asyncio'],
           url='https://pypi.org/project/password-safe-api-client/',
-          version='0!0.37.0',
+          version='0!0.1.0',
           zip_safe=True)
 
 

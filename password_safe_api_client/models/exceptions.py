@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.8
-"""Password Safe API Client: Models.Init
+"""Password Safe API Client: Models.Exceptions
 Copyright © 2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,30 @@ copies or substantial portions of the Software.
 
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
+import logging
+from typing import Union
 
-from .exceptions import InvalidOptionError
-from .query import ManagedAccounts, ManagedSystems
+logger = logging.getLogger(__name__)
+
+
+class InvalidOptionError(Exception):
+    def __init__(self, name: str, message: Union[str, list]):
+        super().__init__(message)
+        self.name = name
+        self.message = message
+
+    def __str__(self):
+        if type(self.message) is list:
+            msg = '\n'.join(self.message)
+        else:
+            msg = str(self.message)
+
+        logger.error(f'Invalid Option for {self.name}; should be one of:\n{msg}')
+
+    def __repr__(self):
+        if type(self.message) is list:
+            msg = '\n'.join(self.message)
+        else:
+            msg = str(self.message)
+
+        logger.error(f'\nInvalid Option for {self.name}; should be one of:\n{msg}')

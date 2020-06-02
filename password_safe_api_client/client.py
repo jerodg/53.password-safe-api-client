@@ -25,9 +25,7 @@ from uuid import uuid4
 
 from base_api_client import BaseApiClient
 from base_api_client.models import Results
-from delorean import parse
-
-from password_safe_api_client.models import *
+from password_safe_api_client.models import ManagedAccounts, ManagedSystems
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +41,7 @@ class PasswordSafeApiClient(BaseApiClient):
                 pointing to a configuration file (json/toml). See
                 config.* in the examples folder for reference."""
         BaseApiClient.__init__(self, cfg=cfg)
+        self.logged_in: bool = False
 
     async def __aenter__(self):
         return self
@@ -62,7 +61,25 @@ class PasswordSafeApiClient(BaseApiClient):
 
         results = await self.process_results(results)
 
-        print('cookie_jar:', self.session.cookie_jar)
+        self.logged_in = True
+
+        return results
+
+    async def get_records(self, query: Union[ManagedAccounts, ManagedSystems]):
+        logger.debug(f'Getting {type(query)}, record(s)...')
+
+        if not self.logged_in:
+            await self.login()
+
+        tasks = [asyncio.create_task(self.request(method='get',
+                                                  end_point=query.end_point,
+                                                  request_id=uuid4().hex,
+                                                  params={**query.dict()}))]
+
+        results = await self.process_results(Results(data=await asyncio.gather(*tasks)), query.data_key)
+
+        logger.debug('-> Complete.')
+
         return results
 
 

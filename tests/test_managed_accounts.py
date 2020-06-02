@@ -1,5 +1,5 @@
 #!/usr/bin/env python3.8
-"""Password Safe API Client: Test Auth
+"""Password Safe API Client: Test Accounts
 Copyright © 2020 Jerod Gawne <https://github.com/jerodg/>
 
 This program is free software: you can redistribute it and/or modify
@@ -24,15 +24,16 @@ from os import getenv
 
 from base_api_client import bprint, Results, tprint
 from password_safe_api_client import PasswordSafeApiClient
+from password_safe_api_client.models import ManagedAccounts
 
 
 @pytest.mark.asyncio
-async def test_login():
+async def test_get_managed_accounts():
     ts = time.perf_counter()
 
-    bprint('Test: Login')
+    bprint('Test: Get Managed Accounts')
     async with PasswordSafeApiClient(cfg=f'{getenv("CFG_HOME")}/password_safe_api_client_dev.toml') as psac:
-        results = await psac.login()
+        results = await psac.get_records(query=ManagedAccounts())
 
         assert type(results) is Results
         assert len(results.success) == 1
@@ -45,26 +46,21 @@ async def test_login():
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
 
-# @pytest.mark.asyncio
-# async def test_logout():
-#     """The call to self.logout() in __aexit__() throws an error due to the
-#        session already being closed. This is expected behavior; comment it when
-#        testing this function."""
-#     ts = time.perf_counter()
-#
-#     bprint('Test: Logout')
-#     async with BricataApiClient(cfg=f'{getenv("CFG_HOME")}/bricata_api_client.toml') as bac:
-#         await bac.login()
-#         print('Header after login:', bac.header)
-#
-#         results = await bac.logout()
-#
-#         assert type(results) is Results
-#         assert len(results.success) == 1
-#         assert not results.failure
-#
-#         print('Header after logout:', bac.header)
-#
-#         tprint(results)
-#
-#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+@pytest.mark.asyncio
+async def test_post_managed_account():
+    ts = time.perf_counter()
+
+    bprint('Test: Post Managed Account')
+    async with PasswordSafeApiClient(cfg=f'{getenv("CFG_HOME")}/password_safe_api_client_dev.toml') as psac:
+        results = await psac.get_records(query=ManagedAccounts())
+
+        assert type(results) is Results
+        assert len(results.success) == 1
+        assert not results.failure
+
+        print('Cookie:')
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+

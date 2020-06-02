@@ -37,7 +37,15 @@ twine = "*"
 wheel = "*"
 
 [packages]
+aiodns = "*"
+aiofiles = "*"
+aiohttp = "*"
 base-api-client = "*"
+cchardet = "*"
+delorean = "*"
+python-rapidjson = "*"
+tenacity = "*"
+toml = "*"
 
 [requires]
 python_version = "3.8"

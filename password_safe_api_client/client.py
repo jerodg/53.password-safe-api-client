@@ -20,11 +20,12 @@ If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
 import asyncio
 import logging
-from typing import Any, List, NoReturn, Tuple, Union
+from typing import NoReturn, Union
 from uuid import uuid4
 
 from base_api_client import BaseApiClient
 from base_api_client.models import Results
+
 from password_safe_api_client.models import ManagedAccounts, ManagedSystems
 
 logger = logging.getLogger(__name__)
@@ -49,11 +50,18 @@ class PasswordSafeApiClient(BaseApiClient):
     async def __aexit__(self, exc_type: None, exc_val: None, exc_tb: None) -> NoReturn:
         await BaseApiClient.__aexit__(self, exc_type, exc_val, exc_tb)
 
-    async def login(self):
-        logger.debug('Logging in to Password Safe')
+    async def authenticate(self, direction: str):
+        """Authenticate (Log in/out)
+
+        Args:
+            direction (str): in|out
+
+        Returns:
+            NoReturn"""
+        logger.debug(f'Logging {direction} {"in to" if direction == "in" else "out of"} Password Safe')
 
         tasks = [asyncio.create_task(self.request(method='post',
-                                                  end_point='/Auth/SignAppin',
+                                                  end_point='/Auth/SignAppin' if direction == 'in' else '/Auth/Signout',
                                                   request_id=uuid4().hex))]
         results = Results(data=await asyncio.gather(*tasks))
 
@@ -61,7 +69,10 @@ class PasswordSafeApiClient(BaseApiClient):
 
         results = await self.process_results(results)
 
-        self.logged_in = True
+        if direction == 'in':
+            self.logged_in = True
+        else:
+            self.logged_in = False
 
         return results
 
@@ -69,7 +80,7 @@ class PasswordSafeApiClient(BaseApiClient):
         logger.debug(f'Getting {type(query)}, record(s)...')
 
         if not self.logged_in:
-            await self.login()
+            await self.authenticate()
 
         tasks = [asyncio.create_task(self.request(method='get',
                                                   end_point=query.end_point,

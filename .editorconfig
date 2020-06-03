@@ -1,12 +1,10 @@
-root = true
-
 [*]
 charset = utf-8
 end_of_line = lf
 indent_size = 4
 indent_style = space
 insert_final_newline = true
-max_line_length = 120
+max_line_length = 132
 tab_width = 4
 trim_trailing_whitespace = true
 ij_continuation_indent_size = 8
@@ -35,6 +33,10 @@ ij_css_space_after_colon = true
 ij_css_space_before_opening_brace = true
 ij_css_use_double_quotes = true
 ij_css_value_alignment = do_not_align
+
+[*.csv]
+max_line_length = 2147483647
+ij_csv_wrap_long_lines = false
 
 [*.feature]
 indent_size = 2
@@ -642,7 +644,6 @@ ij_html_space_inside_empty_tag = false
 ij_html_text_wrap = normal
 
 [{*.py,*.pyw}]
-max_line_length = 132
 ij_python_align_collections_and_comprehensions = true
 ij_python_align_multiline_imports = true
 ij_python_align_multiline_parameters = true
@@ -660,15 +661,15 @@ ij_python_dict_new_line_before_right_brace = false
 ij_python_dict_wrapping = 1
 ij_python_from_import_new_line_after_left_parenthesis = false
 ij_python_from_import_new_line_before_right_parenthesis = false
-ij_python_from_import_parentheses_force_if_multiline = false
+ij_python_from_import_parentheses_force_if_multiline = true
 ij_python_from_import_trailing_comma_if_multiline = false
 ij_python_from_import_wrapping = 1
-ij_python_hang_closing_brackets = false
+ij_python_hang_closing_brackets = true
 ij_python_keep_blank_lines_in_code = 1
 ij_python_keep_blank_lines_in_declarations = 1
 ij_python_keep_indents_on_empty_lines = false
 ij_python_keep_line_breaks = true
-ij_python_new_line_after_colon = false
+ij_python_new_line_after_colon = true
 ij_python_new_line_after_colon_multi_clause = true
 ij_python_optimize_imports_always_split_from_imports = false
 ij_python_optimize_imports_case_insensitive_order = true

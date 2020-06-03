@@ -32,39 +32,30 @@ async def test_login():
 
     bprint('Test: Login')
     async with PasswordSafeApiClient(cfg=f'{getenv("CFG_HOME")}/password_safe_api_client_dev.toml') as psac:
-        results = await psac.login()
+        results = await psac.authenticate(direction='in')
 
         assert type(results) is Results
         assert len(results.success) == 1
         assert not results.failure
-
-        print('Cookie:')
+        assert results.success['UserId']
 
         tprint(results)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
 
 
-# @pytest.mark.asyncio
-# async def test_logout():
-#     """The call to self.logout() in __aexit__() throws an error due to the
-#        session already being closed. This is expected behavior; comment it when
-#        testing this function."""
-#     ts = time.perf_counter()
-#
-#     bprint('Test: Logout')
-#     async with BricataApiClient(cfg=f'{getenv("CFG_HOME")}/bricata_api_client.toml') as bac:
-#         await bac.login()
-#         print('Header after login:', bac.header)
-#
-#         results = await bac.logout()
-#
-#         assert type(results) is Results
-#         assert len(results.success) == 1
-#         assert not results.failure
-#
-#         print('Header after logout:', bac.header)
-#
-#         tprint(results)
-#
-#     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
+@pytest.mark.asyncio
+async def test_logout():
+    ts = time.perf_counter()
+
+    bprint('Test: Logout')
+    async with PasswordSafeApiClient(cfg=f'{getenv("CFG_HOME")}/password_safe_api_client_dev.toml') as psac:
+        results = await psac.authenticate(direction='out')
+
+        assert type(results) is Results
+        assert len(results.success) == 1
+        assert not results.failure
+
+        tprint(results)
+
+    bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')

@@ -84,7 +84,7 @@ class ManagedAccount(Record):
             logger.exception(f'{self.MaxReleaseDuration} is an invalid option; it must be in range: 1 - 525600')
             raise InvalidOptionError('ManagedAccount -> Max Release Duration', 'Range: 1 - 525600')
 
-        if self.MaxConcurrentRequests not in range(0-999):
+        if self.MaxConcurrentRequests not in range(0, 999):
             logger.exception(f'{self.MaxConcurrentRequests} is an invalid option; it must be in range: 0 - 999')
             raise InvalidOptionError('ManagedAccount -> Max Concurrent Requests', 'Range: 0 - 999')
 

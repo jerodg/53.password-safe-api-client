@@ -17,16 +17,15 @@ copies or substantial portions of the Software.
 
 You should have received a copy of the SSPL along with this program.
 If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
-
 import asyncio
 import logging
-from typing import NoReturn, Union
+from typing import NoReturn, Union, List
 from uuid import uuid4
 
 from base_api_client import BaseApiClient
 from base_api_client.models import Results
 
-from password_safe_api_client.models import ManagedAccounts, ManagedSystems
+from password_safe_api_client.models import ManagedAccounts, ManagedSystems, ManagedAccount
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +49,7 @@ class PasswordSafeApiClient(BaseApiClient):
     async def __aexit__(self, exc_type: None, exc_val: None, exc_tb: None) -> NoReturn:
         await BaseApiClient.__aexit__(self, exc_type, exc_val, exc_tb)
 
-    async def authenticate(self, direction: str):
+    async def authenticate(self, direction: str) -> Results:
         """Authenticate (Log in/out)
 
         Args:
@@ -76,11 +75,11 @@ class PasswordSafeApiClient(BaseApiClient):
 
         return results
 
-    async def get_records(self, query: Union[ManagedAccounts, ManagedSystems]):
+    async def get_records(self, query: Union[ManagedAccounts, ManagedSystems]) -> Results:
         logger.debug(f'Getting {type(query)}, record(s)...')
 
         if not self.logged_in:
-            await self.authenticate()
+            await self.authenticate(direction='in')
 
         tasks = [asyncio.create_task(self.request(method='get',
                                                   end_point=query.end_point,
@@ -88,6 +87,26 @@ class PasswordSafeApiClient(BaseApiClient):
                                                   params={**query.dict()}))]
 
         results = await self.process_results(Results(data=await asyncio.gather(*tasks)), query.data_key)
+
+        logger.debug('-> Complete.')
+
+        return results
+
+    async def post_records(self, model: List[Union[ManagedAccount]]) -> Results:
+        logger.debug(f'Posting {type(model)}, record(s)...')
+
+        if not type(model) is list:
+            model = [model]
+
+        if not self.logged_in:
+            await self.authenticate(direction='in')
+
+        tasks = [asyncio.create_task(self.request(method='post',
+                                                  end_point=m.end_point,
+                                                  request_id=uuid4().hex,
+                                                  json=m.dict())) for m in model]
+
+        results = await self.process_results(Results(data=await asyncio.gather(*tasks)))
 
         logger.debug('-> Complete.')
 

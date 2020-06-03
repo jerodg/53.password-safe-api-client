@@ -20,3 +20,4 @@ If not, see <https://www.mongodb.com/licensing/server-side-public-license>."""
 
 from .exceptions import InvalidOptionError
 from .query import ManagedAccounts, ManagedSystems
+from .managed_account import ManagedAccount

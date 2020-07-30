@@ -67,3 +67,7 @@ class ManagedSystems(Record):
     @property
     def end_point(self):
         return '/ManagedSystems'
+
+    @property
+    def data_key(self):
+        return 'Data'

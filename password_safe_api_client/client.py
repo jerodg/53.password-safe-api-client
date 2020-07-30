@@ -92,19 +92,17 @@ class PasswordSafeApiClient(BaseApiClient):
 
         return results
 
-    async def post_records(self, model: List[Union[ManagedAccount]]) -> Results:
-        logger.debug(f'Posting {type(model)}, record(s)...')
-
-        if not type(model) is list:
-            model = [model]
+    async def post_records(self, models: List[Union[ManagedAccount, ManagedAccounts]]) -> Results:
+        if not type(models) is list:
+            models = [models]
 
         if not self.logged_in:
             await self.authenticate(direction='in')
 
-        tasks = [asyncio.create_task(self.request(method='post',
+        tasks = [asyncio.create_task(self.request(method=m.method,
                                                   end_point=m.end_point,
                                                   request_id=uuid4().hex,
-                                                  json=m.dict())) for m in model]
+                                                  json=m.dict())) for m in models]
 
         results = await self.process_results(Results(data=await asyncio.gather(*tasks)))
 

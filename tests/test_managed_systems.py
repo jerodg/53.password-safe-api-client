@@ -36,10 +36,9 @@ async def test_get_managed_systems():
         results = await psac.get_records(query=ManagedSystems())
 
         assert type(results) is Results
-        assert len(results.success) == 1
+        assert len(results.success) >= 1
         assert not results.failure
 
         tprint(results)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-

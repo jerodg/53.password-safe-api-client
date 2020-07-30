@@ -1,0 +1,160 @@
+:doctype: article
+:author: Jerod Gawne
+:email: jerodgawne@gmail.com
+:docdate: June 03, 2020
+:revdate: {docdatetime}
+:description: RHEL Install Python 3.9.x from Source
+:keywords: rhel, python, source
+
+:sectanchors:
+:sectlinks:
+:sectnums:
+:toc:
+:experimental:
+:icons: font
+:checkedbox: pass:normal[{startsb}&#10004;{endsb}]
+:checkbox: pass:normal[{startsb}  {endsb}]
+
+= RHEL 7.x Install Python 3.9.x from Source
+
+== Configure RHEL
+Run as Root
+
+https://access.redhat.com/documentation/en-us/red_hat_developer_toolset/8/html/user_guide/chap-red_hat_developer_toolset[RHEL Documentation]
+
+=== Add Optional Repos
+[source, bash, linenums]
+export HTTPS_PROXY="<user>:<pass>@http://webgateway.info53.com:8080"  # Replace user/pass with your credentials.
+
+=== Configure Proxy for YUM
+Edit /etc/yum.conf
+
+Add the following lines using your credentials.
+
+[source, bash, linenums]
+proxy=http://sogramihqprxy01.info53.com:8080
+proxy_username=<user>
+proxy_password=<pass>
+
+nano /etc/yum.repos.d/redhat.repo
+
+Add:
+[source, bash, linenums]
+
+
+subscription-manager repos --enable rhel-7-server-optional-rpms \
+                           --enable rhel-server-rhscl-7-rpms \
+                           --enable rhel-7-server-devtools-rpms
+
+=== Add RHEL Developer Tools Key
+From https://www.redhat.com/security/data/a5787476.txt
+[source, bash, linenums]
+nano /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-devel
+rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-devel
+
+=== Update RHEL
+[source, bash, linenums]
+yum check-update
+yum update
+
+== Instal Prerequisites
+[source, bash, linenums]
+yum install -y gcc \
+               devtoolset-9-gcc \
+               gcc-c++ \
+               devtoolset-9-gcc-c++ \
+               zlib-devel \
+               libffi-devel \
+               openssl-devel \
+               python-devel \
+               sqlite-devel \
+               krb5-devel \
+               unixODBC \
+               unixODBC-devel \
+               freetds-devel \
+               libdb-devel \
+               libxml2-devel \
+               bzip2-devel \
+               ncurses-devel \
+               readline-devel \
+               tk-devel \
+               gdbm-devel \
+               libpcap-devel \
+               xz-devel \
+               libxslt-devel \
+               freetds \
+               binutils \
+               devtoolset-9-binutils \
+               Xvfb
+
+
+== Download, Build, Install Python
+Run as root.
+
+[source, bash, linenums]
+cd /var/tmp
+mkdir /opt/python
+wget https://www.python.org/ftp/python/3.9.0/Python-3.8.3.tgz
+tar xf Python-3.8*.tgz
+cd Python-3.8*
+export CC="/opt/rh/devtoolset-9/root/bin/gcc"
+export CXX="/opt/rh/devtoolset-9/root/bin/g++"
+./configure --enable-optimizations \
+            --enable-shared \
+            --prefix=/opt/python38 \
+            --enable-loadable-sqlite-extensions \
+            --enable-ipv6 \
+            --with-lto
+make -j $(grep processor /proc/cpuinfo | wc -l)
+make -j $(grep processor /proc/cpuinfo | wc -l) altinstall
+
+=== Configure Link Library
+Run as root.
+
+[source, bash, linenums]
+strip /opt/python38/lib/libpython3.8.so.1.0
+echo '/opt/python38/lib' >> /etc/ld.so.conf.d/python38.conf
+ldconfig
+
+=== Create Symlinks
+Run as root.
+
+[source, bash, linenums]
+ln -sf /opt/python38/bin/python3.8 /opt/python38/bin/py38
+ln -sf /opt/python38/bin /usr/local/bin/python38
+ln -sf /opt/python38/lib /usr/local/lib/python38
+ln -sf /opt/python38/bin/python3.8 /usr/bin/python3.8
+ln -sf /opt/python38/lib/python3.8 /usr/lib/python38
+
+=== Update Base Packages
+[source, bash, linenums]
+/opt/python38/bin/python3.8 -m pip install --upgrade setuptools pip pipenv wheel
+
+=== Configure Permissions
+Run as root. If 'users' isn't the default group on the server change the second line below accordingly.
+
+[source, bash, linenums]
+chmod 0644 /etc/ld.so.conf.d/python38.conf
+chgrp users -R /opt/python38
+chmod 0775 -R /opt/python38
+
+=== Configure Path
+Run as root.
+
+[source, bash, linenums]
+echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/python38/lib' >> /etc/profile.d/python.sh
+echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/python38/lib' >> /etc/profile.d/python.csh
+echo 'export PATH=${PATH}:/opt/python39/bin/:/opt/python38/lib' >> /etc/profile.d/python.sh
+echo 'export PATH=${PATH}:/opt/python39/bin/:/opt/python38/lib' >> /etc/profile.d/python.csh
+
+=== Cleanup
+[source, bash, linenums]
+rm -f /var/tmp/Python-3.8*.tgz
+rm -rf /var/tmp/Python-3.8*
+
+
+== Remove Proxy Credentials
+Edit /etc/yum.conf and remove your user and pass for the lines that were added.
+
+[source, bash, linenums]
+unset HTTPS_PROXY

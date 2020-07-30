@@ -24,7 +24,7 @@ from os import getenv
 
 from base_api_client import bprint, Results, tprint
 from password_safe_api_client import PasswordSafeApiClient
-from password_safe_api_client.models import ManagedAccounts
+from password_safe_api_client.models import ManagedAccounts, ManagedAccount
 
 
 @pytest.mark.asyncio
@@ -52,7 +52,21 @@ async def test_post_managed_account():
 
     bprint('Test: Post Managed Account')
     async with PasswordSafeApiClient(cfg=f'{getenv("CFG_HOME")}/password_safe_api_client_dev.toml') as psac:
-        results = await psac.get_records(query=ManagedAccounts())
+        results = await psac.post_records(model=ManagedAccount(systemID=33,
+                                                               AccountName='Test McTesterton',
+                                                               DistinguishedName='uid=s.McTest,ou=Test,ou=apps,ou=b2e,dc=test53,dc=com',
+                                                               ApiEnabled=True,
+                                                               ReleaseDuration=120,
+                                                               MaxReleaseDuration=1440,
+                                                               ISAReleaseDuration=120,
+                                                               MaxConcurrentRequests=1,
+                                                               AutoManagementFlag=True,
+                                                               CheckPasswordFlag=True,
+                                                               ResetPasswordOnMismatchFlag=True,
+                                                               ChangePasswordAfterAnyReleaseFlag=True,
+                                                               ChangeFrequencyType='xdays',
+                                                               ChangeFrequencyDays=30,
+                                                               ChangeTime='01:00'))
 
         assert type(results) is Results
         assert len(results.success) == 1
@@ -63,4 +77,3 @@ async def test_post_managed_account():
         tprint(results)
 
     bprint(f'-> Completed in {(time.perf_counter() - ts):f} seconds.')
-

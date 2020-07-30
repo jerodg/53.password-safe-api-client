@@ -44,7 +44,7 @@ class ManagedAccount(Record):
     """Managed Account"""
     systemID: int
     AccountName: str
-    Password: str  # Required if AutoManagementFlag is False
+    Password: Optional[Union[str, None]] = None  # Required if AutoManagementFlag is False
     DomainName: Optional[Union[str, None]] = None
     UserPrincipalName: Optional[Union[str, None]] = None  # Required for Active Directory managed systems.
     SAMAccountName: Optional[Union[str, None]] = None  # Requied for Active Directory managed systems.
@@ -64,7 +64,7 @@ class ManagedAccount(Record):
     MaxReleaseDuration: int = 525600
     ISAReleaseDuration: int = 120
     MaxConcurrentRequests: int = 1
-    AutoManagementFlag: bool = False  # True if auto-aanagement is enabled.
+    AutoManagementFlag: bool = True  # True if auto-management is enabled.
     DSSAutoManagementFlag: bool = False  # True if DSS Key auto-management is enabled.
     CheckPasswordFlag: bool = False
     ChangePasswordAfterAnyReleaseFlag: bool = False
@@ -96,6 +96,30 @@ class ManagedAccount(Record):
             logger.exception(f'{self.ChangeFrequencyDays} is required when ChangeFrequencyType is "xdays". Valid range 0 - 999')
             raise InvalidOptionError('ManagedAccount -> Change Frequency Days', 'is required when ChangeFrequencyType is "xdays".')
 
+    def dict(self, cleanup: bool = True, dct: Optional[dict] = None, sort_order: str = 'asc') -> dict:
+        """
+        Args:
+            cleanup (Optional[bool]):
+            dct (Optional[dict]):
+            sort_order (Optional[str]): ASC | DESC
+
+        Returns:
+            dct (dict):"""
+        dct = deepcopy(self.__dict__)
+        del dct['systemID']
+
+        if cleanup:
+            dct = {k: v for k, v in dct.items() if v is not None}
+
+        if sort_order:
+            dct = sort_dict(dct, reverse=True if sort_order.lower() == 'desc' else False)
+
+        return dct
+
     @property
     def end_point(self):
         return f'/ManagedSystems/{self.systemID}/ManagedAccounts'
+
+    @property
+    def method(self):
+        return 'post'
